@@ -36,12 +36,6 @@
 
 DrawCommand currentCommand;
 
-template <typename Base, typename T>
-inline bool instanceof(const T* ptr)
-{
-	return dynamic_cast<const Base*>(ptr) != nullptr;
-}
-
 std::vector<std::string> split(std::string s, std::string delimiter)
 {
 	size_t pos_start = 0, pos_end, delim_len = delimiter.length();
@@ -309,7 +303,6 @@ void Game::ComposeFrame()
 	{
 		gfx.PutPixel(p.getPtX(), p.getPtY(), p.getR(), p.getG(), p.getB());
 	}
-
 
 	for (Point p : drawPoints)
 	{
