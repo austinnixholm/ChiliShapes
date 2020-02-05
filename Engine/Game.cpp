@@ -24,6 +24,7 @@
 #include "Game.h"
 #include <sstream>
 #include <vector>
+#include "stringhelpers.h"
 #include <math.h>
 
 #define DEBUG false
@@ -36,23 +37,6 @@
 
 DrawCommand currentCommand;
 
-std::vector<std::string> split(std::string s, std::string delimiter)
-{
-	size_t pos_start = 0, pos_end, delim_len = delimiter.length();
-	std::string token;
-	std::vector<std::string> res;
-
-	while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos)
-	{
-		token = s.substr(pos_start, pos_end - pos_start);
-		pos_start = pos_end + delim_len;
-		res.push_back(token);
-	}
-
-	res.push_back(s.substr(pos_start));
-	return res;
-}
-
 DrawCommand::CommandType Game::getCommandType(std::string cmdType)
 {
 	if (cmdType == "SQ")
@@ -62,10 +46,16 @@ DrawCommand::CommandType Game::getCommandType(std::string cmdType)
 	return DrawCommand::CommandType::NONE;
 }
 
+bool Game::InBounds(Point p)
+{
+	return p.getPtX() >= 0 && p.getPtY() >= 0 && p.getPtX() <= Graphics::ScreenWidth && p.getPtY() <= Graphics::
+		ScreenHeight;
+}
+
 void Game::ParseCommand(DrawCommand::CommandType commandType, std::string rawCommandData,
                         DrawCommand& command)
 {
-	std::vector<std::string> splitData = split(rawCommandData, COMMAND_DATA_DELIMITER);
+	std::vector<std::string> splitData = stringhelpers::split(rawCommandData, COMMAND_DATA_DELIMITER);
 	switch (commandType)
 	{
 	case DrawCommand::CommandType::CIRCLE:
@@ -215,28 +205,32 @@ void Game::DrawCircle(double radius, int r, int g, int b, int fR, int fG, int fB
 
 	bool isFilled = fR != -1 && fG != -1 && fB != -1;
 
-	if (isFilled) {
-
-		for (int i = rad; i >= range; --i) {
+	if (isFilled)
+	{
+		for (int i = rad; i >= range; --i)
+		{
 			int j = sqrt(rad * rad - i * i);
 
-			for (int k = -j; k <= j; k++) {
-				
+			for (int k = -j; k <= j; k++)
+			{
+				std::list<Point> points;
+
 				Point p1 = Point(centerX - k, centerY + i);
+				p1.addToList(points, p1);
 				Point p2 = Point(centerX - k, centerY - i);
 				Point p3 = Point(centerX + i, centerY + k);
 				Point p4 = Point(centerX - i, centerY - k);
-				std::list<Point> points;
 				points.push_back(p1);
 				points.push_back(p2);
 				points.push_back(p3);
 				points.push_back(p4);
 
-				for (Point p : points) {
-		
-					if (p.getPtX() >= 0 && p.getPtY() >= 0 && p.getPtX() <= Graphics::ScreenWidth && p.getPtY() <= Graphics::
-						ScreenHeight) {
-						p.setRgb(( isFilled && i != radius ? fR : r), (isFilled && i != radius ? fG : b), (isFilled && i != radius ? fB : b));
+				for (Point p : points)
+				{
+					if (InBounds(p))
+					{
+						p.setRgb((isFilled && i != radius ? fR : r), (isFilled && i != radius ? fG : b),
+						         (isFilled && i != radius ? fB : b));
 						if (temp)
 							tempPoints.push_front(p);
 						else
@@ -253,8 +247,8 @@ void Game::DrawCircle(double radius, int r, int g, int b, int fR, int fG, int fB
 				Point p = Point(i, j);
 
 				p.setRgb(fR, fG, fB);
-				if (p.getPtX() >= 0 && p.getPtY() >= 0 && p.getPtX() <= Graphics::ScreenWidth && p.getPtY() <= Graphics::
-					ScreenHeight) {
+				if (InBounds(p))
+				{
 					if (temp)
 						tempPoints.push_front(p);
 					else
@@ -263,14 +257,16 @@ void Game::DrawCircle(double radius, int r, int g, int b, int fR, int fG, int fB
 			}
 		}
 	}
-	else {
+	else
+	{
 		for (double angleDegrees = 0; angleDegrees < 360.0; angleDegrees++)
 		{
 			x1 = rad * cos(DegreesToRadians(angleDegrees));
 			y1 = rad * sin(DegreesToRadians(angleDegrees));
 			Point p = Point(centerX + x1, centerY + y1);
 			if (p.getPtX() >= 0 && p.getPtY() >= 0 && p.getPtX() <= Graphics::ScreenWidth && p.getPtY() <= Graphics::
-				ScreenHeight) {
+				ScreenHeight)
+			{
 				p.setRgb(r, g, b);
 				if (!temp)
 					drawPoints.push_back(p);
@@ -284,7 +280,8 @@ void Game::DrawCircle(double radius, int r, int g, int b, int fR, int fG, int fB
 
 void Game::DrawCircle(DrawCommand command, int centerX, int centerY)
 {
-	DrawCircle(command.getRadius(), command.getR(), command.getG(), command.getB(), command.getFillR(), command.getFillG(), command.getFillB(), centerX, centerY, false);
+	DrawCircle(command.getRadius(), command.getR(), command.getG(), command.getB(), command.getFillR(),
+	           command.getFillG(), command.getFillB(), centerX, centerY, false);
 }
 
 Game::Game(MainWindow& wnd)
@@ -316,17 +313,17 @@ void Game::UpdateModel()
 	Point p = Point(wnd.mouse.GetPosX(), wnd.mouse.GetPosY());
 	bool cmdIsValid = currentCommand.getType() != DrawCommand::NONE;
 	cmdReady = cmdIsValid;
-	if (p.getPtX() >= 0 && p.getPtY() >= 0 && p.getPtX() <= Graphics::ScreenWidth && p.getPtY() <= Graphics::
-		ScreenHeight)
+	if (InBounds(p))
 	{
 		if (wnd.mouse.LeftIsPressed())
 		{
-			if (!cmdIsValid && wnd.kbd.KeyIsPressed(VK_CONTROL)) {
+			if (!cmdIsValid && wnd.kbd.KeyIsPressed(VK_CONTROL))
+			{
 				p.setRgb(255, 40, 40);
 				drawPoints.push_front(p);
 			}
 
-			if (cmdIsValid && !drawing)
+			if (cmdIsValid)
 			{
 				drawing = true;
 				switch (currentCommand.getType())
@@ -355,12 +352,14 @@ void Game::ComposeFrame()
 		if (currentCommand.getType() == DrawCommand::CIRCLE)
 		{
 			DrawCircle(currentCommand.getRadius(), currentCommand.getR(), currentCommand.getG(), currentCommand.getB(),
-				currentCommand.getFillR(), currentCommand.getFillG(), currentCommand.getFillB(),
+			           currentCommand.getFillR(), currentCommand.getFillG(), currentCommand.getFillB(),
 			           placePoint.getPtX(), placePoint.getPtY(), true);
-		} else if (currentCommand.getType() == DrawCommand::SQUARE)
+		}
+		else if (currentCommand.getType() == DrawCommand::SQUARE)
 		{
-			DrawSquare(currentCommand.getWidth(), currentCommand.getHeight(), currentCommand.getR(), currentCommand.getG(), currentCommand.getB(),
-				placePoint.getPtX(), placePoint.getPtY(), true);
+			DrawSquare(currentCommand.getWidth(), currentCommand.getHeight(), currentCommand.getR(),
+			           currentCommand.getG(), currentCommand.getB(),
+			           placePoint.getPtX(), placePoint.getPtY(), true);
 		}
 	}
 

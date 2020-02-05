@@ -44,6 +44,12 @@ public:
 			this->ptY = ptY;
 		}
 
+		Point* addToList(std::list<Point>& list, Point p)
+		{
+			list.push_back(p);
+			return this;
+		}
+
 		int getPtX()
 		{
 			return this->ptX;
@@ -79,6 +85,7 @@ private:
 	void DrawCircle(double radius, int r, int g, int b, int fR, int fG, int fB, int centerX, int centerY, bool temp);
 	void DrawSquare(DrawCommand command, int centerX, int centerY);
 	void DrawSquare(int width, int height, int r, int g, int b, int centerX, int centerY, bool temp);
+	bool InBounds(Point p);
 
 	/********************************/
 	/*  User Functions              */
