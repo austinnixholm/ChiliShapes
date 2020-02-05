@@ -35,6 +35,12 @@
             this.chooseColButton = new System.Windows.Forms.Button();
             this.cancelbtn = new System.Windows.Forms.Button();
             this.submitButton = new System.Windows.Forms.Button();
+            this.fillPanel = new System.Windows.Forms.Panel();
+            this.fillColorBtn = new System.Windows.Forms.Button();
+            this.fillColorPanel = new System.Windows.Forms.Panel();
+            this.label3 = new System.Windows.Forms.Label();
+            this.fillcheckBox = new System.Windows.Forms.CheckBox();
+            this.fillPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // radiusTextBox
@@ -85,7 +91,7 @@
             // cancelbtn
             // 
             this.cancelbtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.cancelbtn.Location = new System.Drawing.Point(15, 134);
+            this.cancelbtn.Location = new System.Drawing.Point(16, 201);
             this.cancelbtn.Name = "cancelbtn";
             this.cancelbtn.Size = new System.Drawing.Size(139, 23);
             this.cancelbtn.TabIndex = 5;
@@ -97,7 +103,7 @@
             // 
             this.submitButton.BackColor = System.Drawing.SystemColors.InactiveCaption;
             this.submitButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.submitButton.Location = new System.Drawing.Point(15, 93);
+            this.submitButton.Location = new System.Drawing.Point(16, 160);
             this.submitButton.Name = "submitButton";
             this.submitButton.Size = new System.Drawing.Size(139, 35);
             this.submitButton.TabIndex = 6;
@@ -105,12 +111,66 @@
             this.submitButton.UseVisualStyleBackColor = false;
             this.submitButton.Click += new System.EventHandler(this.submitButton_Click);
             // 
+            // fillPanel
+            // 
+            this.fillPanel.BackColor = System.Drawing.SystemColors.Control;
+            this.fillPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.fillPanel.Controls.Add(this.label3);
+            this.fillPanel.Controls.Add(this.fillColorBtn);
+            this.fillPanel.Controls.Add(this.fillColorPanel);
+            this.fillPanel.Enabled = false;
+            this.fillPanel.Location = new System.Drawing.Point(16, 109);
+            this.fillPanel.Name = "fillPanel";
+            this.fillPanel.Size = new System.Drawing.Size(138, 45);
+            this.fillPanel.TabIndex = 7;
+            // 
+            // fillColorBtn
+            // 
+            this.fillColorBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.fillColorBtn.Location = new System.Drawing.Point(42, 17);
+            this.fillColorBtn.Name = "fillColorBtn";
+            this.fillColorBtn.Size = new System.Drawing.Size(91, 23);
+            this.fillColorBtn.TabIndex = 9;
+            this.fillColorBtn.Text = "Choose Color";
+            this.fillColorBtn.UseVisualStyleBackColor = true;
+            this.fillColorBtn.Click += new System.EventHandler(this.fillColorBtn_Click);
+            // 
+            // fillColorPanel
+            // 
+            this.fillColorPanel.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.fillColorPanel.Location = new System.Drawing.Point(3, 17);
+            this.fillColorPanel.Name = "fillColorPanel";
+            this.fillColorPanel.Size = new System.Drawing.Size(33, 24);
+            this.fillColorPanel.TabIndex = 8;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(33, 1);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(60, 13);
+            this.label3.TabIndex = 10;
+            this.label3.Text = "Fill Settings";
+            // 
+            // fillcheckBox
+            // 
+            this.fillcheckBox.AutoSize = true;
+            this.fillcheckBox.Location = new System.Drawing.Point(16, 91);
+            this.fillcheckBox.Name = "fillcheckBox";
+            this.fillcheckBox.Size = new System.Drawing.Size(72, 17);
+            this.fillcheckBox.TabIndex = 8;
+            this.fillcheckBox.Text = "Fill circle?";
+            this.fillcheckBox.UseVisualStyleBackColor = true;
+            this.fillcheckBox.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // CircleCommandDetails
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.ClientSize = new System.Drawing.Size(167, 169);
+            this.ClientSize = new System.Drawing.Size(167, 230);
+            this.Controls.Add(this.fillcheckBox);
+            this.Controls.Add(this.fillPanel);
             this.Controls.Add(this.submitButton);
             this.Controls.Add(this.cancelbtn);
             this.Controls.Add(this.chooseColButton);
@@ -121,6 +181,8 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "CircleCommandDetails";
             this.Text = "CircleCommandDetails";
+            this.fillPanel.ResumeLayout(false);
+            this.fillPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -135,5 +197,10 @@
         private System.Windows.Forms.Button chooseColButton;
         private System.Windows.Forms.Button cancelbtn;
         private System.Windows.Forms.Button submitButton;
+        private System.Windows.Forms.Panel fillPanel;
+        private System.Windows.Forms.Button fillColorBtn;
+        private System.Windows.Forms.Panel fillColorPanel;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.CheckBox fillcheckBox;
     }
 }

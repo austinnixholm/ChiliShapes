@@ -26,7 +26,7 @@
 #include <vector>
 #include <math.h>
 
-#define DEBUG true
+#define DEBUG false
 
 #define PIPE_NAME TEXT("\\\\.\\pipe\\CHILICOM")
 #define PIPE_MAX_BUFFER 512
@@ -69,12 +69,13 @@ void Game::ParseCommand(DrawCommand::CommandType commandType, std::string rawCom
 	switch (commandType)
 	{
 	case DrawCommand::CommandType::CIRCLE:
-		if (splitData.size() == 4) // params: radius,r,g,b
+		if (splitData.size() == 7) // params: radius,r,g,b
 		{
 			int radius = std::stoi(splitData[0]);
 			int r = std::stoi(splitData[1]), g = std::stoi(splitData[2]), b = std::stoi(splitData[3]);
+			int fR = std::stoi(splitData[4]), fG = std::stoi(splitData[5]), fB = std::stoi(splitData[6]);
 
-			DrawCommand cmd(radius, r, g, b); //circle draw command
+			DrawCommand cmd(radius, r, g, b, fR, fG, fB); //circle draw command
 			currentCommand = cmd;
 		}
 		break;
@@ -204,28 +205,86 @@ void Game::DrawSquare(DrawCommand command, int centerX, int centerY)
 	           centerY, false);
 }
 
-void Game::DrawCircle(double radius, int r, int g, int b, int centerX, int centerY, bool temp)
+void Game::DrawCircle(double radius, int r, int g, int b, int fR, int fG, int fB, int centerX, int centerY, bool temp)
 {
-	double rad = radius * 1.0;
+	double rad = radius;
 	double x1, y1;
-	for (double angleDegrees = 0; angleDegrees < 360.0; angleDegrees++)
-	{
-		x1 = rad * cos(DegreesToRadians(angleDegrees));
-		y1 = rad * sin(DegreesToRadians(angleDegrees));
-		Point p = Point(centerX + x1, centerY + y1);
-		p.setRgb(r, g, b);
-		if (!temp)
-			drawPoints.push_front(p);
-		else
-			tempPoints.push_back(p);
-	}
 
+	double sinus = sin(45);
+	double range = 1;
+
+	bool isFilled = fR != -1 && fG != -1 && fB != -1;
+
+	if (isFilled) {
+
+		for (int i = rad; i >= range; --i) {
+			int j = sqrt(rad * rad - i * i);
+
+			for (int k = -j; k <= j; k++) {
+				
+				Point p1 = Point(centerX - k, centerY + i);
+				Point p2 = Point(centerX - k, centerY - i);
+				Point p3 = Point(centerX + i, centerY + k);
+				Point p4 = Point(centerX - i, centerY - k);
+				std::list<Point> points;
+				points.push_back(p1);
+				points.push_back(p2);
+				points.push_back(p3);
+				points.push_back(p4);
+
+				for (Point p : points) {
+		
+					if (p.getPtX() >= 0 && p.getPtY() >= 0 && p.getPtX() <= Graphics::ScreenWidth && p.getPtY() <= Graphics::
+						ScreenHeight) {
+						p.setRgb(( isFilled && i != radius ? fR : r), (isFilled && i != radius ? fG : b), (isFilled && i != radius ? fB : b));
+						if (temp)
+							tempPoints.push_front(p);
+						else
+							drawPoints.push_back(p);
+					}
+				}
+			}
+		}
+		range = r * sinus;
+		for (int i = centerX - range + 1; i < centerX + range; i++)
+		{
+			for (int j = centerY - range + 1; j < centerY + range; j++)
+			{
+				Point p = Point(i, j);
+
+				p.setRgb(fR, fG, fB);
+				if (p.getPtX() >= 0 && p.getPtY() >= 0 && p.getPtX() <= Graphics::ScreenWidth && p.getPtY() <= Graphics::
+					ScreenHeight) {
+					if (temp)
+						tempPoints.push_front(p);
+					else
+						drawPoints.push_back(p);
+				}
+			}
+		}
+	}
+	else {
+		for (double angleDegrees = 0; angleDegrees < 360.0; angleDegrees++)
+		{
+			x1 = rad * cos(DegreesToRadians(angleDegrees));
+			y1 = rad * sin(DegreesToRadians(angleDegrees));
+			Point p = Point(centerX + x1, centerY + y1);
+			if (p.getPtX() >= 0 && p.getPtY() >= 0 && p.getPtX() <= Graphics::ScreenWidth && p.getPtY() <= Graphics::
+				ScreenHeight) {
+				p.setRgb(r, g, b);
+				if (!temp)
+					drawPoints.push_back(p);
+				else
+					tempPoints.push_front(p);
+			}
+		}
+	}
 	drawing = false;
 }
 
 void Game::DrawCircle(DrawCommand command, int centerX, int centerY)
 {
-	DrawCircle(command.getRadius(), command.getR(), command.getG(), command.getB(), centerX, centerY, false);
+	DrawCircle(command.getRadius(), command.getR(), command.getG(), command.getB(), command.getFillR(), command.getFillG(), command.getFillB(), centerX, centerY, false);
 }
 
 Game::Game(MainWindow& wnd)
@@ -262,6 +321,11 @@ void Game::UpdateModel()
 	{
 		if (wnd.mouse.LeftIsPressed())
 		{
+			if (!cmdIsValid && wnd.kbd.KeyIsPressed(VK_CONTROL)) {
+				p.setRgb(255, 40, 40);
+				drawPoints.push_front(p);
+			}
+
 			if (cmdIsValid && !drawing)
 			{
 				drawing = true;
@@ -291,6 +355,7 @@ void Game::ComposeFrame()
 		if (currentCommand.getType() == DrawCommand::CIRCLE)
 		{
 			DrawCircle(currentCommand.getRadius(), currentCommand.getR(), currentCommand.getG(), currentCommand.getB(),
+				currentCommand.getFillR(), currentCommand.getFillG(), currentCommand.getFillB(),
 			           placePoint.getPtX(), placePoint.getPtY(), true);
 		} else if (currentCommand.getType() == DrawCommand::SQUARE)
 		{

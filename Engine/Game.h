@@ -76,7 +76,7 @@ private:
 	void ParseAndAddCommand(std::string command);
 	void WaitForComs();
 	void DrawCircle(DrawCommand command, int centerX, int centerY);
-	void DrawCircle(double radius, int r, int g, int b, int centerX, int centerY, bool temp);
+	void DrawCircle(double radius, int r, int g, int b, int fR, int fG, int fB, int centerX, int centerY, bool temp);
 	void DrawSquare(DrawCommand command, int centerX, int centerY);
 	void DrawSquare(int width, int height, int r, int g, int b, int centerX, int centerY, bool temp);
 
